@@ -51,7 +51,10 @@ class NotificationsView extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8).r,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ).r,
                   decoration: BoxDecoration(
                     color: AppColors.alertRed,
                     borderRadius: BorderRadius.circular(20).r,
@@ -100,28 +103,24 @@ class NotificationsView extends StatelessWidget {
               title: 'Humidifier Alert',
               description: 'Humidity levels low',
               time: '9:41 AM',
-              isUnread: false,
             ),
             const NotificationCard(
               icon: AppAssets.temperatureIcon,
               title: 'Temperature sensor malfunction',
               description: 'Please check temperature sensor',
               time: '9:41 AM',
-              isUnread: false,
             ),
             const NotificationCard(
               icon: AppAssets.calendarIcon,
               title: 'Hatching period',
               description: 'Please move eggs to hatching chamber',
               time: '9:41 AM',
-              isUnread: false,
             ),
             const NotificationCard(
               icon: AppAssets.calendarIcon,
               title: 'Hatching period',
               description: 'Incubation has been completed',
               time: '9:41 AM',
-              isUnread: false,
             ),
           ],
         ),
