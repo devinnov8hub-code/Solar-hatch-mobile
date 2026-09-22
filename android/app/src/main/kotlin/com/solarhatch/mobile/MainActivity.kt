@@ -1,4 +1,4 @@
-package com.example.solar_hatch_mobile
+package com.solarhatch.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

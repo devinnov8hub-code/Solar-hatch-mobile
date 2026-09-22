@@ -7,8 +7,18 @@ import 'package:solar_hatch_mobile/src/widgets/incubation_status_card.dart';
 import 'package:solar_hatch_mobile/src/widgets/network_status_card.dart';
 import 'package:solar_hatch_mobile/src/widgets/system_diagnostic_card.dart';
 
-class DashboardView extends StatelessWidget {
+import 'package:solar_hatch_mobile/src/model/incubation_data.dart';
+import 'package:solar_hatch_mobile/src/controller/firebase_service.dart';
+
+class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
+
+  @override
+  State<DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
+  final FirebaseService _firebaseService = FirebaseService();
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +62,28 @@ class DashboardView extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16).r,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            24.verticalSpace,
-            // Network Status
-            const NetworkStatusCard(),
-            const SizedBox(height: 24),
+      body: StreamBuilder<IncubationData>(
+        stream: _firebaseService.incubationDataStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error loading data'));
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator(color: AppColors.primaryDarkGreen));
+          }
+
+          final data = snapshot.data ?? IncubationData.initial();
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16).r,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                24.verticalSpace,
+                // Network Status
+                NetworkStatusCard(isConnected: data.wifiStatus == 1),
+                const SizedBox(height: 24),
 
             // System Diagnostics Section
             Container(
@@ -127,28 +150,30 @@ class DashboardView extends StatelessWidget {
               title: 'Incubation Status',
             ),
             12.verticalSpace,
-            const IncubationStatusCard(
+            IncubationStatusCard(
               icon: AppAssets.temperatureIcon,
               title: 'Temperature',
-              value: '30°C',
+              value: '${data.temperature}°C',
             ),
-            const IncubationStatusCard(
+            IncubationStatusCard(
               icon: AppAssets.humidityIcon,
               title: 'Humidity',
-              value: '10%RH',
+              value: '${data.humidity}%RH',
             ),
-            const IncubationStatusCard(
+            IncubationStatusCard(
               icon: AppAssets.calendarIcon,
               title: 'Total Days',
-              value: '21',
+              value: '${data.totalIncubationDays}',
             ),
-            const IncubationStatusCard(
+            IncubationStatusCard(
               icon: AppAssets.incubationIcon,
               title: 'Days left',
-              value: '13',
+              value: '${data.totalIncubationDays - data.currentIncubationDay}',
             ),
           ],
         ),
+      );
+        },
       ),
     );
   }
