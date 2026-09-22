@@ -9,4 +9,6 @@ class AppColors {
   static const Color textDark = Color(0xFF1B2A22); // Dark text for titles
   static const Color textLight = Colors.white;
   static const Color cardBackground = Colors.white;
+  static const Color alertRed = Color(0xFFFF9E9E); // Dismiss All background
+  static const Color alertRedText = Color(0xFFD32F2F); // Dismiss All text
 }

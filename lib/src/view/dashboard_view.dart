@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:solar_hatch_mobile/src/core/app_assets.dart';
 import 'package:solar_hatch_mobile/src/core/app_colors.dart';
+import 'package:solar_hatch_mobile/src/view/widgets/notifications_view.dart';
 import 'package:solar_hatch_mobile/src/widgets/incubation_status_card.dart';
 import 'package:solar_hatch_mobile/src/widgets/network_status_card.dart';
 import 'package:solar_hatch_mobile/src/widgets/system_diagnostic_card.dart';
@@ -39,7 +40,12 @@ class DashboardView extends StatelessWidget {
                 Icons.notifications_none,
                 color: AppColors.accentYellow,
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NotificationsView()),
+                );
+              },
             ),
           ),
         ],
