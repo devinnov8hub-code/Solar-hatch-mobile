@@ -43,7 +43,9 @@ class DashboardView extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const NotificationsView()),
+                  MaterialPageRoute<void>(
+                    builder: (context) => const NotificationsView(),
+                  ),
                 );
               },
             ),
