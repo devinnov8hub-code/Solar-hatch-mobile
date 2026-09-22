@@ -26,7 +26,7 @@ class SystemDiagnosticCard extends StatelessWidget {
     final statusText = isOperational ? 'OPERATIONAL' : 'WARNING';
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12).r,
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(8),

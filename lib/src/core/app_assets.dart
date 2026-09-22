@@ -15,4 +15,6 @@ class AppAssets {
   static const humidityIcon = 'assets/humidity_icon.png';
   static const calendarIcon = 'assets/calendar_icon.png';
   static const incubationIcon = 'assets/incubation_icon.png';
+
+  static const dashboardBg = 'assets/dashboard_bg.png';
 }

@@ -4,7 +4,7 @@ import 'package:solar_hatch_mobile/src/controller/firebase_service.dart';
 import 'package:solar_hatch_mobile/src/core/app_assets.dart';
 import 'package:solar_hatch_mobile/src/core/app_colors.dart';
 import 'package:solar_hatch_mobile/src/model/incubation_data.dart';
-import 'package:solar_hatch_mobile/src/view/widgets/notifications_view.dart';
+import 'package:solar_hatch_mobile/src/view/notifications_view.dart';
 import 'package:solar_hatch_mobile/src/widgets/incubation_status_card.dart';
 import 'package:solar_hatch_mobile/src/widgets/network_status_card.dart';
 import 'package:solar_hatch_mobile/src/widgets/system_diagnostic_card.dart';
@@ -24,16 +24,20 @@ class _DashboardViewState extends State<DashboardView> {
     return Scaffold(
       backgroundColor: AppColors.backgroundScaffold,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: AppColors.backgroundScaffold,
         elevation: 0,
         title: Row(
           children: [
             // Placeholder for Logo, using Splash.png cropped or scaled
-            Image.asset(
-              AppAssets.logo,
-              height: 55.h,
-              width: 82.w,
-              fit: BoxFit.cover,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Image.asset(
+                AppAssets.logo,
+                height: 55,
+                width: 82,
+                fit: BoxFit.fitHeight,
+              ),
             ),
           ],
         ),
@@ -94,8 +98,18 @@ class _DashboardViewState extends State<DashboardView> {
                   padding: const EdgeInsets.all(16).r,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
+                    image: const DecorationImage(
+                      opacity: .1,
+                      fit: BoxFit.cover,
+                      image: AssetImage(AppAssets.dashboardBg),
+                    ),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFF9CB78), Color(0xFFE4F0D3)],
+                      colors: [
+                        Color(0xFFF9CB78), Color(0xFFE4F0D3),
+
+                        //  Color.fromRGBO(249, 172, 1, 1),
+                        // Color(0xFFE4F0D3),
+                      ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -110,13 +124,18 @@ class _DashboardViewState extends State<DashboardView> {
                       14.verticalSpace,
                       Builder(
                         builder: (context) {
-                          final humidityDiff = (data.humidity - data.setHumidity).abs();
+                          final humidityDiff =
+                              (data.humidity - data.setHumidity).abs();
                           final isHumidifierWarning = humidityDiff > 5.0;
-                          
-                          final tempDiff = (data.temperature - data.setTemperature).abs();
+
+                          final tempDiff =
+                              (data.temperature - data.setTemperature).abs();
                           final isHeaterWarning = tempDiff > 1.0;
-                
-                          final isSystemWarning = isHumidifierWarning || isHeaterWarning || data.wifiStatus == 0;
+
+                          final isSystemWarning =
+                              isHumidifierWarning ||
+                              isHeaterWarning ||
+                              data.wifiStatus == 0;
 
                           return GridView.count(
                             crossAxisCount: 2,
@@ -125,25 +144,37 @@ class _DashboardViewState extends State<DashboardView> {
                             shrinkWrap: true,
                             padding: EdgeInsets.zero,
                             physics: const NeverScrollableScrollPhysics(),
-                            childAspectRatio: 1.7,
+                            childAspectRatio: 1.7.sp,
                             children: [
                               SystemDiagnosticCard(
                                 icon: AppAssets.settingsIcon,
                                 title: 'System Health',
-                                status: isSystemWarning ? DiagnosticStatus.warning : DiagnosticStatus.operational,
-                                description: isSystemWarning ? 'Check subsystems' : 'All systems Normal',
+                                status: isSystemWarning
+                                    ? DiagnosticStatus.warning
+                                    : DiagnosticStatus.operational,
+                                description: isSystemWarning
+                                    ? 'Check subsystems'
+                                    : 'All systems Normal',
                               ),
                               SystemDiagnosticCard(
                                 icon: AppAssets.humidifierIcon,
                                 title: 'Humidifier',
-                                status: isHumidifierWarning ? DiagnosticStatus.warning : DiagnosticStatus.operational,
-                                description: isHumidifierWarning ? 'Humidity out of range' : 'Humidity stable',
+                                status: isHumidifierWarning
+                                    ? DiagnosticStatus.warning
+                                    : DiagnosticStatus.operational,
+                                description: isHumidifierWarning
+                                    ? 'Humidity out of range'
+                                    : 'Humidity stable',
                               ),
                               SystemDiagnosticCard(
                                 icon: AppAssets.heaterIcon,
                                 title: 'Heater',
-                                status: isHeaterWarning ? DiagnosticStatus.warning : DiagnosticStatus.operational,
-                                description: isHeaterWarning ? 'Temp out of range' : 'Temperature stable',
+                                status: isHeaterWarning
+                                    ? DiagnosticStatus.warning
+                                    : DiagnosticStatus.operational,
+                                description: isHeaterWarning
+                                    ? 'Temp out of range'
+                                    : 'Temperature stable',
                               ),
                               const SystemDiagnosticCard(
                                 icon: AppAssets.motorSensorIcon,
@@ -153,7 +184,7 @@ class _DashboardViewState extends State<DashboardView> {
                               ),
                             ],
                           );
-                        }
+                        },
                       ),
                     ],
                   ),
