@@ -31,7 +31,7 @@ class _DashboardViewState extends State<DashboardView> {
           children: [
             // Placeholder for Logo, using Splash.png cropped or scaled
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8).r,
               child: Image.asset(
                 AppAssets.logo,
                 height: 55,
