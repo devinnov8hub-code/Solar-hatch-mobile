@@ -75,8 +75,3 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.solarhatch.mobile',
   );
 }
-
-
-
-
-

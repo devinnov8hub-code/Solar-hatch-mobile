@@ -82,15 +82,16 @@ class NotificationCard extends StatelessWidget {
               Text(
                 time,
                 style: TextStyle(
-                  color: isUnread
-                      ? Colors.white
-                      : AppColors.primaryDarkGreen,
+                  color: isUnread ? Colors.white : AppColors.primaryDarkGreen,
                   fontSize: 12.spMin,
                 ),
               ),
               24.verticalSpace,
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6).r,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ).r,
                 decoration: BoxDecoration(
                   color: AppColors.accentYellow,
                   borderRadius: BorderRadius.circular(8).r,

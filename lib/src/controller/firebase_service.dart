@@ -24,7 +24,9 @@ class FirebaseService {
       if (data != null) {
         final alerts = <AlertData>[];
         data.forEach((key, value) {
-          alerts.add(AlertData.fromJson(key.toString(), value as Map<dynamic, dynamic>));
+          alerts.add(
+            AlertData.fromJson(key.toString(), value as Map<dynamic, dynamic>),
+          );
         });
         return alerts.reversed.toList();
       }
@@ -38,15 +40,17 @@ class FirebaseService {
       print('User granted permission: ${settings.authorizationStatus}');
     }
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized || 
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
-      
       // On iOS, we need the APNS token before we can get the FCM token
-      if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
         final apnsToken = await _fcm.getAPNSToken();
         if (apnsToken == null) {
           if (kDebugMode) {
-            print('APNS token not available. If you are on an iOS simulator, push notifications are not supported.');
+            print(
+              'APNS token not available. If you are on an iOS simulator, push notifications are not supported.',
+            );
           }
           return; // Abort token generation
         }
@@ -56,7 +60,7 @@ class FirebaseService {
       if (kDebugMode) {
         print('FCM Token: $token');
       }
-      
+
       if (token != null) {
         await _dbRef.child('fcmTokens').child(token).set({
           'token': token,
