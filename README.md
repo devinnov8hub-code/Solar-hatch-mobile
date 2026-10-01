@@ -38,7 +38,7 @@ Make sure you have the [Flutter SDK](https://docs.flutter.dev/get-started/instal
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/devinnov8hub-code/Solar-hatch-mobile
    ```
 2. Navigate to the project directory:
    ```bash
