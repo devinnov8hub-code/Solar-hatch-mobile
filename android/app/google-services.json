@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "791002802079",
+    "firebase_url": "https://smarteggincubator-5ee0f-default-rtdb.firebaseio.com",
+    "project_id": "smarteggincubator-5ee0f",
+    "storage_bucket": "smarteggincubator-5ee0f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:791002802079:android:e8109e555a51c7bfc87faa",
+        "android_client_info": {
+          "package_name": "com.solarhatch.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWI-dK6JlGxpAj_TLHLYJR-y_pGATwqGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

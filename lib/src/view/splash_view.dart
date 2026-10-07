@@ -19,7 +19,7 @@ class _SplashViewState extends State<SplashView> {
   }
 
   void _navigateToDashBoard() {
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 1), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute<void>(builder: (context) => const DashboardView()),

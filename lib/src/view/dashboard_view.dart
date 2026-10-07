@@ -1,30 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:solar_hatch_mobile/src/controller/firebase_service.dart';
 import 'package:solar_hatch_mobile/src/core/app_assets.dart';
 import 'package:solar_hatch_mobile/src/core/app_colors.dart';
-import 'package:solar_hatch_mobile/src/view/widgets/notifications_view.dart';
+import 'package:solar_hatch_mobile/src/model/incubation_data.dart';
+import 'package:solar_hatch_mobile/src/view/notifications_view.dart';
 import 'package:solar_hatch_mobile/src/widgets/incubation_status_card.dart';
 import 'package:solar_hatch_mobile/src/widgets/network_status_card.dart';
 import 'package:solar_hatch_mobile/src/widgets/system_diagnostic_card.dart';
 
-class DashboardView extends StatelessWidget {
+class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
+
+  @override
+  State<DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
+  final FirebaseService _firebaseService = FirebaseService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundScaffold,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: AppColors.backgroundScaffold,
         elevation: 0,
         title: Row(
           children: [
             // Placeholder for Logo, using Splash.png cropped or scaled
-            Image.asset(
-              AppAssets.logo,
-              height: 55.h,
-              width: 82.w,
-              fit: BoxFit.cover,
+            Padding(
+              padding: const EdgeInsets.all(8).r,
+              child: Image.asset(
+                AppAssets.logo,
+                height: 55,
+                width: 82,
+                fit: BoxFit.fitHeight,
+              ),
             ),
           ],
         ),
@@ -52,103 +65,163 @@ class DashboardView extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16).r,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            24.verticalSpace,
-            // Network Status
-            const NetworkStatusCard(),
-            const SizedBox(height: 24),
+      body: StreamBuilder<IncubationData>(
+        stream: _firebaseService.incubationDataStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error loading data'));
+          }
 
-            // System Diagnostics Section
-            Container(
-              padding: const EdgeInsets.all(16).r,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFF9CB78), Color(0xFFE4F0D3)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryDarkGreen,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildSectionHeader(
-                    icon: AppAssets.pulseIcon,
-                    title: 'SYSTEM DIAGNOSTICS',
+            );
+          }
+
+          final data = snapshot.data ?? IncubationData.initial();
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16).r,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                24.verticalSpace,
+                // Network Status
+                NetworkStatusCard(isConnected: data.wifiStatus == 1),
+                const SizedBox(height: 24),
+
+                // System Diagnostics Section
+                Container(
+                  padding: const EdgeInsets.all(16).r,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    image: const DecorationImage(
+                      opacity: .1,
+                      fit: BoxFit.cover,
+                      image: AssetImage(AppAssets.dashboardBg),
+                    ),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFF9CB78), Color(0xFFE4F0D3),
+
+                        //  Color.fromRGBO(249, 172, 1, 1),
+                        // Color(0xFFE4F0D3),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                   ),
-                  14.verticalSpace,
-                  GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: 1.7,
-                    children: const [
-                      SystemDiagnosticCard(
-                        icon: AppAssets.settingsIcon,
-                        title: 'System Health',
-                        status: DiagnosticStatus.operational,
-                        description: 'All systems Normal',
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildSectionHeader(
+                        icon: AppAssets.pulseIcon,
+                        title: 'SYSTEM DIAGNOSTICS',
                       ),
-                      SystemDiagnosticCard(
-                        icon: AppAssets.humidifierIcon,
-                        title: 'Humidifier',
-                        status: DiagnosticStatus.warning,
-                        description: '',
-                      ),
-                      SystemDiagnosticCard(
-                        icon: AppAssets.heaterIcon,
-                        title: 'Heater',
-                        status: DiagnosticStatus.operational,
-                        description: 'Temperature stable',
-                      ),
-                      SystemDiagnosticCard(
-                        icon: AppAssets.motorSensorIcon,
-                        title: 'Motor Sensor',
-                        status: DiagnosticStatus.operational,
-                        description: '',
+                      14.verticalSpace,
+                      Builder(
+                        builder: (context) {
+                          final humidityDiff =
+                              (data.humidity - data.setHumidity).abs();
+                          final isHumidifierWarning = humidityDiff > 5.0;
+
+                          final tempDiff =
+                              (data.temperature - data.setTemperature).abs();
+                          final isHeaterWarning = tempDiff > 1.0;
+
+                          final isSystemWarning =
+                              isHumidifierWarning ||
+                              isHeaterWarning ||
+                              data.wifiStatus == 0;
+
+                          return GridView.count(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            shrinkWrap: true,
+                            padding: EdgeInsets.zero,
+                            physics: const NeverScrollableScrollPhysics(),
+                            childAspectRatio: 1.7.sp,
+                            children: [
+                              SystemDiagnosticCard(
+                                icon: AppAssets.settingsIcon,
+                                title: 'System Health',
+                                status: isSystemWarning
+                                    ? DiagnosticStatus.warning
+                                    : DiagnosticStatus.operational,
+                                description: isSystemWarning
+                                    ? 'Check subsystems'
+                                    : 'All systems Normal',
+                              ),
+                              SystemDiagnosticCard(
+                                icon: AppAssets.humidifierIcon,
+                                title: 'Humidifier',
+                                status: isHumidifierWarning
+                                    ? DiagnosticStatus.warning
+                                    : DiagnosticStatus.operational,
+                                description: isHumidifierWarning
+                                    ? 'Humidity out of range'
+                                    : 'Humidity stable',
+                              ),
+                              SystemDiagnosticCard(
+                                icon: AppAssets.heaterIcon,
+                                title: 'Heater',
+                                status: isHeaterWarning
+                                    ? DiagnosticStatus.warning
+                                    : DiagnosticStatus.operational,
+                                description: isHeaterWarning
+                                    ? 'Temp out of range'
+                                    : 'Temperature stable',
+                              ),
+                              const SystemDiagnosticCard(
+                                icon: AppAssets.motorSensorIcon,
+                                title: 'Motor Sensor',
+                                status: DiagnosticStatus.operational,
+                                description: 'Operational',
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            24.verticalSpace,
+                ),
+                24.verticalSpace,
 
-            // Incubation Status Section
-            _buildSectionHeader(
-              icon: AppAssets.hourGlassHighIcon,
-              title: 'Incubation Status',
+                // Incubation Status Section
+                _buildSectionHeader(
+                  icon: AppAssets.hourGlassHighIcon,
+                  title: 'Incubation Status',
+                ),
+                12.verticalSpace,
+                IncubationStatusCard(
+                  icon: AppAssets.temperatureIcon,
+                  title: 'Temperature',
+                  value: '${data.temperature}°C',
+                ),
+                IncubationStatusCard(
+                  icon: AppAssets.humidityIcon,
+                  title: 'Humidity',
+                  value: '${data.humidity}%RH',
+                ),
+                IncubationStatusCard(
+                  icon: AppAssets.calendarIcon,
+                  title: 'Total Days',
+                  value: '${data.totalIncubationDays}',
+                ),
+                IncubationStatusCard(
+                  icon: AppAssets.incubationIcon,
+                  title: 'Days left',
+                  value:
+                      '${data.totalIncubationDays - data.currentIncubationDay}',
+                ),
+              ],
             ),
-            12.verticalSpace,
-            const IncubationStatusCard(
-              icon: AppAssets.temperatureIcon,
-              title: 'Temperature',
-              value: '30°C',
-            ),
-            const IncubationStatusCard(
-              icon: AppAssets.humidityIcon,
-              title: 'Humidity',
-              value: '10%RH',
-            ),
-            const IncubationStatusCard(
-              icon: AppAssets.calendarIcon,
-              title: 'Total Days',
-              value: '21',
-            ),
-            const IncubationStatusCard(
-              icon: AppAssets.incubationIcon,
-              title: 'Days left',
-              value: '13',
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

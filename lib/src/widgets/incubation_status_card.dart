@@ -37,7 +37,7 @@ class IncubationStatusCard extends StatelessWidget {
               color: AppColors.primaryDarkGreen.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Image.asset(icon, width: 24.w, height: 24.h),
+            child: Image.asset(icon, width: 24.r, height: 24.r),
           ),
           20.horizontalSpace,
           Expanded(
