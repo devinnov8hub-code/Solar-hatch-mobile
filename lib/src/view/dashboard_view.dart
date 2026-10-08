@@ -89,7 +89,10 @@ class _DashboardViewState extends State<DashboardView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 24.verticalSpace,
+
                 // Network Status
+
+                ///TODO : Check the wifi status and display it
                 NetworkStatusCard(isConnected: data.wifiStatus == 1),
                 const SizedBox(height: 24),
 
