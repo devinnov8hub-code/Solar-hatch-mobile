@@ -14,6 +14,10 @@ analyzer:
     exclude:
       - "**/*.g.dart"
       - "**/*.freezed.dart"
+      - build/**
+      - android/**
+      - ios/**
+      - web/**
     errors:
       avoid_dynamic_calls: ignore
       avoid_positional_boolean_parameters: ignore
