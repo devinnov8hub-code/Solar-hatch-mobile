@@ -91,9 +91,7 @@ class _DashboardViewState extends State<DashboardView> {
                 24.verticalSpace,
 
                 // Network Status
-
-                ///TODO : Check the wifi status and display it
-                NetworkStatusCard(isConnected: data.wifiStatus == 1),
+                const NetworkStatusCard(),
                 const SizedBox(height: 24),
 
                 // System Diagnostics Section
