@@ -30,13 +30,19 @@ class _DashboardViewState extends State<DashboardView> {
         title: Row(
           children: [
             // Placeholder for Logo, using Splash.png cropped or scaled
-            Padding(
-              padding: const EdgeInsets.all(8).r,
-              child: Image.asset(
-                AppAssets.logo,
-                height: 55,
-                width: 82,
-                fit: BoxFit.fitHeight,
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8).r,
+                child: Image.asset(
+                  AppAssets.logo,
+                  height: 55,
+                  width: 82,
+                  fit: BoxFit.fitHeight,
+                ),
               ),
             ),
           ],
@@ -218,6 +224,16 @@ class _DashboardViewState extends State<DashboardView> {
                   title: 'Days left',
                   value:
                       '${data.totalIncubationDays - data.currentIncubationDay}',
+                ),
+                const IncubationStatusCard(
+                  icon: AppAssets.turnIntervalIcon,
+                  title: 'Turn Interval (Minutes)',
+                  value: '45',
+                ),
+                const IncubationStatusCard(
+                  icon: AppAssets.turnIntervalIcon,
+                  title: 'Turn Stops',
+                  value: '65',
                 ),
               ],
             ),

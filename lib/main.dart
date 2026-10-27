@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart' hide FirebaseService;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:solar_hatch_mobile/app.dart';
 import 'package:solar_hatch_mobile/firebase_options.dart';
 import 'package:solar_hatch_mobile/src/controller/firebase_service.dart';
@@ -15,14 +16,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // We wrap in a try-catch to not block app startup if network is unavailable
   try {
-    await FirebaseService().initNotifications();
+    unawaited(FirebaseService().initNotifications());
   } catch (e) {
     debugPrint('Failed to init notifications: $e');
   }
