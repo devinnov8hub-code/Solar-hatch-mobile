@@ -42,23 +42,12 @@ class NetworkCheckerService {
   /// Synchronously returns `true` if internet connection is currently active.
   bool get isConnected => _currentStatus == InternetStatus.connected;
 
-  /// Streams boolean internet connection status (`true` = connected, `false` = disconnected).
-  ///
-  /// Emits the current status immediately to any new listener, followed by
-  /// any live status changes.
-  Stream<bool> get isConnectedStream async* {
-    yield isConnected;
-    yield* _connectedController.stream;
-  }
+  /// Broadcast stream of boolean internet connection status
+  /// (`true` = connected, `false` = disconnected).
+  Stream<bool> get isConnectedStream => _connectedController.stream;
 
-  /// Streams raw [InternetStatus] enum events.
-  ///
-  /// Emits the current [InternetStatus] immediately to any new listener,
-  /// followed by live status changes.
-  Stream<InternetStatus> get statusStream async* {
-    yield _currentStatus;
-    yield* _statusController.stream;
-  }
+  /// Broadcast stream of raw [InternetStatus] enum events.
+  Stream<InternetStatus> get statusStream => _statusController.stream;
 
   /// Actively checks internet reachability and updates listeners.
   ///
@@ -79,6 +68,13 @@ class NetworkCheckerService {
   }
 
   void _init() {
+    // If last try results are already known, adopt them immediately
+    final last = _internetConnection.lastTryResults;
+    if (last != null) {
+      _currentStatus = last;
+      _isInitialized = true;
+    }
+
     _subscription = _internetConnection.onStatusChange.listen(
       _updateStatus,
       onError: (Object error) {
@@ -107,12 +103,12 @@ class NetworkCheckerService {
     }
   }
 
-  /// Disposes resources and closes streams.
-  Future<void> dispose() async {
-    await _subscription?.cancel();
+  /// Disposes resources and closes internal streams.
+  void dispose() {
+    unawaited(_subscription?.cancel());
     _subscription = null;
-    await _statusController.close();
-    await _connectedController.close();
+    unawaited(_statusController.close());
+    unawaited(_connectedController.close());
     if (identical(_instance, this)) {
       _instance = null;
     }

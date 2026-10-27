@@ -13,7 +13,7 @@ class FakeInternetConnection implements InternetConnection {
       : _hasAccess = initialAccess;
 
   final StreamController<InternetStatus> _controller =
-      StreamController<InternetStatus>.broadcast();
+      StreamController<InternetStatus>.broadcast(sync: true);
 
   bool _hasAccess;
 
@@ -51,12 +51,12 @@ void main() {
     late NetworkCheckerService service;
 
     setUp(() {
-      fakeConnection = FakeInternetConnection(initialAccess: true);
+      fakeConnection = FakeInternetConnection();
       service = NetworkCheckerService(internetConnection: fakeConnection);
     });
 
     tearDown(() async {
-      await service.dispose();
+      service.dispose();
       await fakeConnection.dispose();
     });
 
@@ -71,18 +71,13 @@ void main() {
       final statuses = <bool>[];
       final subscription = service.isConnectedStream.listen(statuses.add);
 
-      // Allow initial yield
-      await Future<void>.delayed(Duration.zero);
+      fakeConnection
+        ..emitStatus(InternetStatus.disconnected)
+        ..emitStatus(InternetStatus.connected);
 
-      // Emit disconnected
-      fakeConnection.emitStatus(InternetStatus.disconnected);
-      await Future<void>.delayed(Duration.zero);
+      await pumpEventQueue();
 
-      // Emit connected
-      fakeConnection.emitStatus(InternetStatus.connected);
-      await Future<void>.delayed(Duration.zero);
-
-      expect(statuses, containsAllInOrder([false, true]));
+      expect(statuses, equals([false, true]));
 
       await subscription.cancel();
     });
@@ -91,12 +86,11 @@ void main() {
       final statuses = <InternetStatus>[];
       final subscription = service.statusStream.listen(statuses.add);
 
-      await Future<void>.delayed(Duration.zero);
-
       fakeConnection.emitStatus(InternetStatus.disconnected);
-      await Future<void>.delayed(Duration.zero);
 
-      expect(statuses, contains(InternetStatus.disconnected));
+      await pumpEventQueue();
+
+      expect(statuses, equals([InternetStatus.disconnected]));
 
       await subscription.cancel();
     });
@@ -138,7 +132,7 @@ void main() {
 
     testWidgets('updates live when NetworkCheckerService emits changes',
         (tester) async {
-      final fake = FakeInternetConnection(initialAccess: true);
+      final fake = FakeInternetConnection();
       final testService = NetworkCheckerService(internetConnection: fake);
 
       await tester.pumpWidget(
@@ -152,24 +146,22 @@ void main() {
         ),
       );
 
-      await tester.pump();
       expect(find.text('Connected'), findsOneWidget);
 
       fake.emitStatus(InternetStatus.disconnected);
-      await Future<void>.delayed(Duration.zero);
       await tester.pump();
 
       expect(find.text('Disconnected'), findsOneWidget);
       expect(find.byIcon(Icons.wifi_off), findsOneWidget);
 
-      await testService.dispose();
+      testService.dispose();
       await fake.dispose();
     });
   });
 
   group('NetworkConnectivityBuilder', () {
     testWidgets('rebuilds UI when network status changes', (tester) async {
-      final fake = FakeInternetConnection(initialAccess: true);
+      final fake = FakeInternetConnection();
       final testService = NetworkCheckerService(internetConnection: fake);
 
       await tester.pumpWidget(
@@ -187,16 +179,14 @@ void main() {
         ),
       );
 
-      await tester.pump();
       expect(find.text('ONLINE'), findsOneWidget);
 
       fake.emitStatus(InternetStatus.disconnected);
-      await Future<void>.delayed(Duration.zero);
       await tester.pump();
 
       expect(find.text('OFFLINE'), findsOneWidget);
 
-      await testService.dispose();
+      testService.dispose();
       await fake.dispose();
     });
   });
