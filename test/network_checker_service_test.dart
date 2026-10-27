@@ -156,6 +156,7 @@ void main() {
       expect(find.text('Connected'), findsOneWidget);
 
       fake.emitStatus(InternetStatus.disconnected);
+      await Future<void>.delayed(Duration.zero);
       await tester.pump();
 
       expect(find.text('Disconnected'), findsOneWidget);
@@ -190,6 +191,7 @@ void main() {
       expect(find.text('ONLINE'), findsOneWidget);
 
       fake.emitStatus(InternetStatus.disconnected);
+      await Future<void>.delayed(Duration.zero);
       await tester.pump();
 
       expect(find.text('OFFLINE'), findsOneWidget);
