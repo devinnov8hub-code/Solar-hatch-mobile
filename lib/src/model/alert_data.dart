@@ -35,6 +35,10 @@ class AlertData {
         return AppAssets.temperatureIcon;
       case 'calendar':
         return AppAssets.calendarIcon;
+      case 'motor':
+      case 'motorturn':
+      case 'motorTurned':
+        return AppAssets.motorSensorIcon;
       case 'system':
       default:
         return AppAssets.settingsIcon;

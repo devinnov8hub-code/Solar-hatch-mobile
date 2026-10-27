@@ -225,15 +225,15 @@ class _DashboardViewState extends State<DashboardView> {
                   value:
                       '${data.totalIncubationDays - data.currentIncubationDay}',
                 ),
-                const IncubationStatusCard(
+                IncubationStatusCard(
                   icon: AppAssets.turnIntervalIcon,
                   title: 'Turn Interval (Minutes)',
-                  value: '45',
+                  value: '${data.turnInterval}',
                 ),
-                const IncubationStatusCard(
-                  icon: AppAssets.turnIntervalIcon,
-                  title: 'Turn Stops',
-                  value: '65',
+                IncubationStatusCard(
+                  icon: AppAssets.turnStopIcon,
+                  title: 'Turn Stop',
+                  value: data.turnStop == 0 ? 'Active' : 'Completed',
                 ),
               ],
             ),

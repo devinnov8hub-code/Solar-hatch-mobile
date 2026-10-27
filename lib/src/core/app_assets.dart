@@ -16,6 +16,7 @@ class AppAssets {
   static const calendarIcon = 'assets/calendar_icon.png';
   static const incubationIcon = 'assets/incubation_icon.png';
   static const turnIntervalIcon = 'assets/turn_interval_icon.png';
+  static const turnStopIcon = 'assets/turn_stop_icon.png';
 
   static const dashboardBg = 'assets/dashboard_bg.png';
 }

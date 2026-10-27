@@ -710,3 +710,10 @@ flutter test
 ---
 
 *Engineered with Flutter for smart agricultural efficiency and sustainable solar incubation.*
+
+
+
+cd functions
+npm install
+cd ..
+firebase deploy --only functions
