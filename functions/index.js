@@ -1,23 +1,28 @@
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
+const { onValueWritten } = require("firebase-functions/v2/database");
+const { initializeApp } = require("firebase-admin/app");
+const { getDatabase, ServerValue } = require("firebase-admin/database");
+const { getMessaging } = require("firebase-admin/messaging");
 
-admin.initializeApp();
+initializeApp();
 
 /**
- * Cloud Function triggered on RTDB `/test` changes.
+ * Cloud Function (2nd Gen) triggered on RTDB `/test` changes.
  * Monitors telemetry and sends push notifications (FCM) and in-app alerts
  * for motor turn events, temperature/humidity warnings, and connectivity changes.
  */
-exports.onIncubatorDataChange = functions.database
-  .ref("/test")
-  .onWrite(async (change, context) => {
+exports.onIncubatorDataChange = onValueWritten(
+  {
+    ref: "/test",
+    region: "asia-southeast1",
+  },
+  async (event) => {
     // Exit if data was deleted
-    if (!change.after.exists()) {
+    if (!event.data.after.exists()) {
       return null;
     }
 
-    const beforeData = change.before.exists() ? change.before.val() : {};
-    const afterData = change.after.val();
+    const beforeData = event.data.before.exists() ? event.data.before.val() : {};
+    const afterData = event.data.after.val();
 
     const alertsToSend = [];
 
@@ -99,7 +104,8 @@ exports.onIncubatorDataChange = functions.database
     }
 
     // Fetch registered device FCM tokens
-    const tokensSnapshot = await admin.database().ref("/fcmTokens").once("value");
+    const db = getDatabase();
+    const tokensSnapshot = await db.ref("/fcmTokens").once("value");
     const tokensMap = tokensSnapshot.val() || {};
     const tokens = Object.keys(tokensMap).filter(Boolean);
 
@@ -112,13 +118,13 @@ exports.onIncubatorDataChange = functions.database
 
     for (const alert of alertsToSend) {
       // 1. Write to RTDB `/alerts` for in-app NotificationsView list
-      await admin.database().ref("/alerts").push({
+      await db.ref("/alerts").push({
         title: alert.title,
         description: alert.description,
         time: timeString,
         isUnread: true,
         iconType: alert.iconType,
-        createdAt: admin.database.ServerValue.TIMESTAMP,
+        createdAt: ServerValue.TIMESTAMP,
       });
 
       // 2. Broadcast push notification to all devices
@@ -142,7 +148,7 @@ exports.onIncubatorDataChange = functions.database
         };
 
         try {
-          const response = await admin.messaging().sendEachForMulticast(messagePayload);
+          const response = await getMessaging().sendEachForMulticast(messagePayload);
           console.log(`Sent notification "${alert.title}" successfully: ${response.successCount} succeeded, ${response.failureCount} failed.`);
 
           // Clean up invalid or expired tokens
@@ -161,7 +167,7 @@ exports.onIncubatorDataChange = functions.database
             });
 
             await Promise.all(
-              tokensToRemove.map((t) => admin.database().ref(`/fcmTokens/${t}`).remove())
+              tokensToRemove.map((t) => db.ref(`/fcmTokens/${t}`).remove())
             );
           }
         } catch (error) {
