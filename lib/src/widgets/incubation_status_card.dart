@@ -33,8 +33,8 @@ class IncubationStatusCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(12).r,
-            decoration: BoxDecoration(
-              color: AppColors.primaryDarkGreen.withValues(alpha: 0.1),
+            decoration: const BoxDecoration(
+              color: Color.fromRGBO(231, 248, 237, 1),
               shape: BoxShape.circle,
             ),
             child: Image.asset(icon, width: 24.r, height: 24.r),
