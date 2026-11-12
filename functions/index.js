@@ -135,6 +135,22 @@ exports.onIncubatorDataChange = onValueWritten(
             title: alert.title,
             body: alert.description,
           },
+          android: {
+            priority: "high",
+            notification: {
+              channelId: "solar_hatch_alerts_channel",
+              defaultSound: true,
+              defaultVibrateTimings: true,
+              priority: "high",
+            },
+          },
+          apns: {
+            payload: {
+              aps: {
+                sound: "default",
+              },
+            },
+          },
           data: {
             click_action: "FLUTTER_NOTIFICATION_CLICK",
             type: alert.type,

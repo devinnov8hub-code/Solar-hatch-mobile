@@ -36,6 +36,7 @@ Connected directly to **Firebase Realtime Database (RTDB)** and **Firebase Cloud
   - [Prerequisites](#prerequisites)
   - [Installation Steps](#installation-steps)
   - [Firebase Configuration](#firebase-configuration)
+  - [Cloud Functions Deployment (Push Notifications)](#cloud-functions-deployment-push-notifications)
   - [Running the Application](#running-the-application)
 - [Code Quality & Testing](#code-quality--testing)
   - [Static Analysis](#static-analysis)
@@ -589,7 +590,7 @@ flutter doctor
 
 ### Firebase Configuration
 
-The application is pre-configured with Firebase project `smarteggincubator-5ee0f`. The credentials and options are maintained in:
+The application is pre-configured with Firebase project `smartincubator-a521b`. The credentials and options are maintained in:
 - Android: `android/app/google-services.json`
 - iOS: `ios/Runner/GoogleService-Info.plist`
 - Flutter/Dart: `lib/firebase_options.dart`
@@ -597,6 +598,48 @@ The application is pre-configured with Firebase project `smarteggincubator-5ee0f
 To reconfigure or link to a custom Firebase project:
 ```bash
 flutterfire configure --project=<your-firebase-project-id>
+```
+
+---
+
+### Cloud Functions Deployment (Push Notifications)
+
+The `functions/` directory contains a **2nd Gen Firebase Cloud Function** (`onIncubatorDataChange`) running on **Node.js 22** in `asia-southeast1` (collocated with the Realtime Database instance). It listens to changes on the `/test` node in Firebase Realtime Database, writes in-app alerts to `/alerts`, and broadcasts high-priority vibrating FCM push notifications to all registered devices in `/fcmTokens`.
+
+#### 1. Install Function Dependencies
+```bash
+cd functions
+npm install
+cd ..
+```
+
+#### 2. Authenticate & Set the Active Firebase Project
+Ensure you are logged in to the Firebase CLI and have linked the workspace to `smartincubator-a521b`:
+```bash
+npx -y firebase-tools@latest login
+npx -y firebase-tools@latest use smartincubator-a521b
+```
+
+#### 3. Deploy Cloud Functions
+> **Note:** Deploying Cloud Functions requires the Firebase project to be on the **Blaze (pay-as-you-go)** billing plan. On the very first 2nd Gen deployment, Eventarc Service Agent permissions may take 2–5 minutes to propagate; if prompted, wait a few minutes and re-run the deploy command.
+
+```bash
+npx -y firebase-tools@latest deploy --only functions
+```
+
+#### 4. Testing Push Notifications & Viewing Logs
+To trigger a test notification from the terminal (e.g., simulating a motor turn completion):
+```bash
+# 1. Reset motorTurned to 0
+npx -y firebase-tools@latest database:update /test --data '{"motorTurned": 0, "currentIncubationDay": 5}' --project smartincubator-a521b --force
+
+# 2. Flip motorTurned to 1 to trigger the alert
+npx -y firebase-tools@latest database:update /test --data '{"motorTurned": 1}' --project smartincubator-a521b --force
+```
+
+To inspect Cloud Function execution and FCM delivery logs:
+```bash
+npx -y firebase-tools@latest functions:log --only onIncubatorDataChange
 ```
 
 ---
@@ -710,10 +753,3 @@ flutter test
 ---
 
 *Engineered with Flutter for smart agricultural efficiency and sustainable solar incubation.*
-
-
-
-cd functions
-npm install
-cd ..
-firebase deploy --only functions
